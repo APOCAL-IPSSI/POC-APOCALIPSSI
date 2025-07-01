@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { uploadPDF } from '../services/api';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const UploadPage = () => {
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -39,21 +45,32 @@ const UploadPage = () => {
     }
   };
 
+  const handleSubmit = async () => {
+    if (!file) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Uploading file:', file.name, 'size:', file.size);
+      const result = await uploadPDF(file);
+      console.log('Upload successful, result:', result);
+      setSummary(result.summary);
+    } catch (err) {
+      console.error('Upload failed with error:', err);
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+        setError('Impossible de se connecter au serveur. Vérifiez que le serveur backend est en cours d\'exécution.');
+      } else {
+        setError(err.message || 'Une erreur s\'est produite lors du traitement du document.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
-      <header className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-white">Apocalipsii</h1>
-          <nav>
-            <ul className="flex space-x-6">
-              <li><Link to="/" className="text-white hover:text-blue-300 transition">Accueil</Link></li>
-              <li><Link to="/upload" className="text-white hover:text-blue-300 transition">Télécharger PDF</Link></li>
-              <li><Link to="/text" className="text-white hover:text-blue-300 transition">Saisir Texte</Link></li>
-              <li><Link to="/history" className="text-white hover:text-blue-300 transition">Historique</Link></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-3xl mx-auto">
@@ -96,12 +113,28 @@ const UploadPage = () => {
 
           <div className="mt-8 text-center">
             <button 
-              className={`px-8 py-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition ${!file && 'opacity-50 cursor-not-allowed'}`}
-              disabled={!file}
+              className={`px-8 py-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition ${(!file || loading) && 'opacity-50 cursor-not-allowed'}`}
+              disabled={!file || loading}
+              onClick={handleSubmit}
             >
-              Analyser le document
+              {loading ? 'Analyse en cours...' : 'Analyser le document'}
             </button>
           </div>
+          
+          {error && (
+            <div className="mt-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 text-red-100 rounded-lg">
+              {error}
+            </div>
+          )}
+          
+          {summary && (
+            <div className="mt-8 p-6 bg-white bg-opacity-10 backdrop-blur-sm rounded-xl border border-white border-opacity-10">
+              <h3 className="text-2xl font-semibold text-white mb-4">Résultats d'analyse</h3>
+              <div className="text-blue-100 whitespace-pre-line">
+                {summary}
+              </div>
+            </div>
+          )}
 
           <div className="mt-12 p-6 bg-white bg-opacity-5 backdrop-blur-sm rounded-xl border border-white border-opacity-10">
             <h3 className="text-2xl font-semibold text-white mb-4">Comment ça marche?</h3>
@@ -129,13 +162,7 @@ const UploadPage = () => {
         </div>
       </main>
 
-      <footer className="bg-black bg-opacity-30 py-8 mt-24">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-blue-200">
-            © {new Date().getFullYear()} Apocalipsii - Assistant Intelligent de Synthèse de Documents
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

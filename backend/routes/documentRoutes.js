@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { processDocument } = require('../controllers/documentController');
+const { processDocument, processRawText } = require('../controllers/documentController');
+
 
 const storage = multer.diskStorage({
   destination: 'uploads/',
@@ -11,5 +12,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/upload', upload.single('pdf'), processDocument);
+
+router.post('/text', processRawText);
+
+
 
 module.exports = router;

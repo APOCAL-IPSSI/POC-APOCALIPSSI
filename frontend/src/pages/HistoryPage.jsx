@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 const HistoryPage = () => {
   // Exemple de données d'historique (dans une application réelle, ces données viendraient d'une API)
   const [historyItems, setHistoryItems] = useState([
@@ -19,19 +20,7 @@ const HistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
-      <header className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-white">Apocalipsii</h1>
-          <nav>
-            <ul className="flex space-x-6">
-              <li><Link to="/" className="text-white hover:text-blue-300 transition">Accueil</Link></li>
-              <li><Link to="/upload" className="text-white hover:text-blue-300 transition">Télécharger PDF</Link></li>
-              <li><Link to="/text" className="text-white hover:text-blue-300 transition">Saisir Texte</Link></li>
-              <li><Link to="/history" className="text-white hover:text-blue-300 transition">Historique</Link></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12">
         <h2 className="text-4xl font-bold text-center text-white mb-12">Historique des Analyses</h2>
@@ -97,13 +86,7 @@ const HistoryPage = () => {
         )}
       </main>
 
-      <footer className="bg-black bg-opacity-30 py-8 mt-24">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-blue-200">
-            © {new Date().getFullYear()} Apocalipsii - Assistant Intelligent de Synthèse de Documents
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

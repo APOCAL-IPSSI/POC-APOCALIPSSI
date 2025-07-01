@@ -1,28 +1,45 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { processText } from '../services/api';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const TextPage = () => {
   const [text, setText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleTextChange = (e) => {
     setText(e.target.value);
   };
 
+  const handleSubmit = async () => {
+    if (!text.trim()) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Processing text with length:', text.length);
+      const result = await processText(text);
+      console.log('Text processing successful, result:', result);
+      setSummary(result.summary);
+    } catch (err) {
+      console.error('Text processing failed with error:', err);
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+        setError('Impossible de se connecter au serveur. Vérifiez que le serveur backend est en cours d\'exécution.');
+      } else {
+        setError(err.message || 'Une erreur s\'est produite lors du traitement du texte.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
-      <header className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-white">Apocalipsii</h1>
-          <nav>
-            <ul className="flex space-x-6">
-              <li><Link to="/" className="text-white hover:text-blue-300 transition">Accueil</Link></li>
-              <li><Link to="/upload" className="text-white hover:text-blue-300 transition">Télécharger PDF</Link></li>
-              <li><Link to="/text" className="text-white hover:text-blue-300 transition">Saisir Texte</Link></li>
-              <li><Link to="/history" className="text-white hover:text-blue-300 transition">Historique</Link></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-3xl mx-auto">
@@ -38,12 +55,28 @@ const TextPage = () => {
             
             <div className="mt-6 text-center">
               <button 
-                className={`px-8 py-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition ${!text.trim() && 'opacity-50 cursor-not-allowed'}`}
-                disabled={!text.trim()}
+                className={`px-8 py-4 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition ${(!text.trim() || loading) && 'opacity-50 cursor-not-allowed'}`}
+                disabled={!text.trim() || loading}
+                onClick={handleSubmit}
               >
-                Analyser le texte
+                {loading ? 'Analyse en cours...' : 'Analyser le texte'}
               </button>
             </div>
+            
+            {error && (
+              <div className="mt-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 text-red-100 rounded-lg">
+                {error}
+              </div>
+            )}
+            
+            {summary && (
+              <div className="mt-8 p-6 bg-white bg-opacity-10 backdrop-blur-sm rounded-xl border border-white border-opacity-10">
+                <h3 className="text-2xl font-semibold text-white mb-4">Résultats d'analyse</h3>
+                <div className="text-blue-100 whitespace-pre-line">
+                  {summary}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-12 p-6 bg-white bg-opacity-5 backdrop-blur-sm rounded-xl border border-white border-opacity-10">
@@ -90,13 +123,7 @@ const TextPage = () => {
         </div>
       </main>
 
-      <footer className="bg-black bg-opacity-30 py-8 mt-24">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-blue-200">
-            © {new Date().getFullYear()} Apocalipsii - Assistant Intelligent de Synthèse de Documents
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
