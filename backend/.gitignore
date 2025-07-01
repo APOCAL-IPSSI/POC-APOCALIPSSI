@@ -1,0 +1,47 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS merde
+.DS_Store
+Thumbs.db
+
+# Env secrets
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+out/
+
+# Test coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# TypeScript
+*.tsbuildinfo
+
+# Binaries
+*.exe
+*.out
+*.dll
+
+# Misc
+*.tgz
+*.bak
+*.swp
