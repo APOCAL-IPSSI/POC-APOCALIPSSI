@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { extractTextFromPDF } = require('../utils/pdfUtils');
+const Document = require('../models/Document');
 
 exports.processDocument = async (req, res) => {
   try {
@@ -37,6 +38,17 @@ ${pdfText}
     );
 
     const summary = response.data.choices?.[0]?.message?.content;
+    
+    // Sauvegarder le document dans MongoDB
+    const newDocument = new Document({
+      name: req.file.originalname,
+      type: 'pdf',
+      filePath: req.file.path.replace(/\\/g, '/'), 
+      summary: summary
+    });
+    
+    await newDocument.save();
+    
     res.json({ summary });
 
   } catch (error) {
@@ -95,11 +107,82 @@ ${rawText}
     );
 
     const summary = response.data.choices?.[0]?.message?.content;
+    
+    // Sauvegarder le document texte dans MongoDB
+    const newDocument = new Document({
+      name: `Texte_${new Date().toISOString().split('T')[0]}`,
+      type: 'text',
+      rawText: rawText,
+      summary: summary
+    });
+    
+    await newDocument.save();
+    
     res.json({ summary });
 
   } catch (error) {
     const errMsg = error.response?.data || error.message;
     console.error('Erreur de traitement (texte brut):', errMsg);
     res.status(500).json({ error: errMsg });
+  }
+};
+
+exports.getAllDocuments = async (req, res) => {
+  try {
+    const documents = await Document.find().sort({ createdAt: -1 });
+    
+    const formattedDocuments = documents.map(doc => {
+      let filename = '';
+      if (doc.type === 'pdf' && doc.filePath) {
+        filename = doc.filePath.split(/[/\\]/).pop();
+      }
+      
+      return {
+        id: doc._id,
+        type: doc.type,
+        name: doc.name,
+        date: doc.createdAt.toLocaleDateString('fr-FR'),
+        summary: doc.summary,
+        rawText: doc.type === 'text' ? doc.rawText : null,
+        filePath: doc.type === 'pdf' ? `/uploads/${filename}` : null
+      };
+    });
+    
+    res.json(formattedDocuments);
+  } catch (error) {
+    console.error('Erreur de récupération des documents:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des documents' });
+  }
+};
+
+exports.deleteDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const document = await Document.findById(id);
+    
+    if (!document) {
+      return res.status(404).json({ error: 'Document non trouvé' });
+    }
+    
+    if (document.type === 'pdf' && document.filePath) {
+      const fs = require('fs');
+      const path = require('path');
+      
+      try {
+        fs.unlinkSync(document.filePath);
+        console.log(`File ${document.filePath} deleted successfully`);
+      } catch (err) {
+        console.error(`Error deleting file ${document.filePath}:`, err);
+      }
+    }
+    
+    // Delete from MongoDB
+    await Document.findByIdAndDelete(id);
+    
+    res.json({ message: 'Document supprimé avec succès' });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du document:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression du document' });
   }
 };

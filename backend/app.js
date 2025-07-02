@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const documentRoutes = require('./routes/documentRoutes');
 const path = require('path');
+const cors = require('cors');
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
@@ -10,9 +11,21 @@ const swaggerSpec = require('./swagger');
 dotenv.config();
 const app = express();
 
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST', 'DELETE'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use('/api/docs', documentRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const uploadsPath = path.join(__dirname, 'uploads');
+const fs = require('fs');
+if (!fs.existsSync(uploadsPath)){
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsPath));
 
 // Swagger UI route
 app.use('/api/docs/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
