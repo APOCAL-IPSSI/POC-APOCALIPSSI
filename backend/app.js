@@ -5,6 +5,9 @@ const documentRoutes = require('./routes/documentRoutes');
 const path = require('path');
 const cors = require('cors');
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
+
 dotenv.config();
 const app = express();
 
@@ -24,9 +27,14 @@ if (!fs.existsSync(uploadsPath)){
 }
 app.use('/uploads', express.static(uploadsPath));
 
+// Swagger UI route
+app.use('/api/docs/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('🟢 MongoDB connecté'))
   .catch(err => console.error('🔴 Erreur MongoDB', err));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Backend lancé sur http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Backend lancé sur http://0.0.0.0:${PORT}`);
+});
