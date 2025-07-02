@@ -16,4 +16,6 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error('🔴 Erreur MongoDB', err));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Backend lancé sur http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Backend lancé sur http://0.0.0.0:${PORT}`);
+});
