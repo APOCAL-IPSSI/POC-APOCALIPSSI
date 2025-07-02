@@ -155,7 +155,7 @@ const UploadPage = () => {
                 <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center mr-4">
                   <span className="text-white font-medium">3</span>
                 </div>
-                <p className="text-blue-100">Recevez une synthèse structurée.</p>
+                <p className="text-blue-100">Recevez une synthèse structurée ,des points clés et des suggestions d'actions.</p>
               </div>
             </div>
           </div>

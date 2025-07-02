@@ -14,7 +14,7 @@ const LandingPage = () => {
               Assistant Intelligent de Synthèse de Documents
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              Téléchargez vos documents PDF ou saisissez du texte pour obtenir instantanément une synthèse structurée et les points clés.
+              Téléchargez vos documents PDF ou saisissez du texte pour obtenir instantanément une synthèse structurée ,des points clés et des suggestions d'actions.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Link 

@@ -8,16 +8,21 @@ const cors = require('cors');
 dotenv.config();
 const app = express();
 
-// Add CORS middleware BEFORE routes
 app.use(cors({
   origin: 'http://localhost:5173', 
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
 
 app.use(express.json());
 app.use('/api/docs', documentRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const uploadsPath = path.join(__dirname, 'uploads');
+const fs = require('fs');
+if (!fs.existsSync(uploadsPath)){
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsPath));
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('🟢 MongoDB connecté'))
