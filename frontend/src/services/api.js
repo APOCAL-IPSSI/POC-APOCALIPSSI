@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = "https://poc-apocalipssi-production.up.railway.app/api";
 
 export const uploadPDF = async (file, charLimit = 1000) => {
   const formData = new FormData();
