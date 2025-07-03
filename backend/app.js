@@ -11,11 +11,24 @@ const swaggerSpec = require('./swagger');
 dotenv.config();
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://independent-playfulness-production.up.railway.app'
+];
+
+
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`❌ CORS bloqué : origine ${origin} non autorisée`));
+    }
+  },
   methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
+
 
 app.use(express.json());
 app.use('/api/docs', documentRoutes);
